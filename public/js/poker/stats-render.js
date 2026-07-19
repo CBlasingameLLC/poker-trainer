@@ -29,6 +29,7 @@
         handRankings: 'Hand Rankings',
         preflop: 'Preflop Ranges',
         potOdds: 'Pot Odds',
+        postflop: 'Postflop',
         targeted: 'Targeted'
     };
 
@@ -61,6 +62,12 @@
         }
         if (parts[0] === 'potOdds') {
             return 'Pot odds: ' + parts.slice(1).join(':');
+        }
+        if (parts[0] === 'postflop') {
+            const info = PK.Postflop && PK.Postflop.CATEGORY_INFO[parts[1]];
+            const what = info ? info.short : parts[1];
+            const ctx = parts[2] === 'checkedTo' ? 'checked to you' : 'facing a bet';
+            return 'Postflop: ' + what + ', ' + ctx;
         }
         return key;
     }

@@ -257,6 +257,7 @@ body {
 .tile--rankings { --tile-tint: rgba(227,193,111,0.13); }
 .tile--preflop  { --tile-tint: rgba(120,190,255,0.10); }
 .tile--odds     { --tile-tint: rgba(70,201,138,0.10); }
+.tile--postflop { --tile-tint: rgba(160,120,220,0.10); }
 .tile--targeted { --tile-tint: rgba(229,84,90,0.12); }
 
 .tile:disabled { cursor: default; opacity: 0.45; }

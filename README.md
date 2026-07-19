@@ -16,6 +16,9 @@ adaptive weak-spot mode:
   #1 beginner leak: which hands to open from which position.
 - **Pot Odds** — is the call profitable? Compare the price of a call to your
   equity from outs (rule of 2 & 4).
+- **Postflop Decisions** — real flop/turn spots: classify your hand (monster,
+  strong, strong draw, marginal, weak draw, air) and bet, check, raise, call,
+  or fold. Advanced tier mixes in turn boards and marginal hands.
 - **Targeted Practice** — re-drills the exact spots you miss most, weighted by
   how often you miss them. Unlocks once you've logged a mistake.
 
@@ -34,7 +37,7 @@ support. Wrappable in Capacitor (`com.juntopress.poker`).
 
 ```
 public/js/poker/
-  cards.js hand-eval.js ranges.js odds.js   # pure, DOM-free logic
+  cards.js hand-eval.js ranges.js odds.js postflop.js   # pure, DOM-free logic
   scenarios.js drill-manager.js             # fabricate + grade + record
   render.js reference-render.js stats-render.js
   ui-bindings.js hub.js boot.js audio.js
