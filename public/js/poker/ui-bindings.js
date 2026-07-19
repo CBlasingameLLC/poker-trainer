@@ -19,6 +19,7 @@
         handRankings: 'Hand Rankings',
         preflop: 'Preflop Ranges',
         potOdds: 'Pot Odds',
+        postflop: 'Postflop Decisions',
         targeted: 'Targeted Practice'
     };
 

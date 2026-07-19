@@ -18,6 +18,7 @@
     var HandEval = PK.HandEval;
     var Ranges = PK.Ranges;
     var Odds = PK.Odds;
+    var Postflop = PK.Postflop;
 
     function el(tag, cls, text) {
         const n = document.createElement(tag);
@@ -140,6 +141,31 @@
         return block;
     }
 
+    // Postflop cheat sheet — one row per hand category, straight out of
+    // Postflop.CATEGORY_INFO (the same table that grades the drill).
+    function buildPostflopSheet() {
+        const block = el('div', 'ref-block');
+        block.appendChild(el('h3', null, 'Postflop decisions by hand strength'));
+        block.appendChild(el('p', 'panel-sub',
+            'Classify your hand after the flop, then apply one rule per row. ' +
+            'A marginal hand that also holds a big draw plays as a strong draw.'));
+
+        const table = el('table', 'odds-table');
+        table.innerHTML =
+            '<tr><th>Your hand</th><th>Checked to you</th><th>Facing a bet</th></tr>';
+        Postflop.CATEGORIES.forEach(cat => {
+            const info = Postflop.CATEGORY_INFO[cat];
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>' + info.label + '</td>' +
+                '<td>' + capitalize(info.checkedTo) + '</td>' +
+                '<td>' + capitalize(info.facingBet) + '</td>';
+            table.appendChild(tr);
+        });
+        block.appendChild(table);
+        return block;
+    }
+
     function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
     let lastTier = null;
@@ -155,6 +181,7 @@
         if (heading) container.appendChild(heading);
         if (intro) container.appendChild(intro);
         container.appendChild(buildRangeGrids(tier));
+        container.appendChild(buildPostflopSheet());
         container.appendChild(buildRankings());
         container.appendChild(buildPotOdds());
     }

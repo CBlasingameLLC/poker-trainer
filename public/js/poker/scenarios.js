@@ -35,6 +35,7 @@
     var HandEval = PK.HandEval || (typeof require !== 'undefined' && require('./hand-eval.js'));
     var Ranges   = PK.Ranges   || (typeof require !== 'undefined' && require('./ranges.js'));
     var Odds     = PK.Odds     || (typeof require !== 'undefined' && require('./odds.js'));
+    var Postflop = PK.Postflop || (typeof require !== 'undefined' && require('./postflop.js'));
 
     const MAX_TRIES = 60;
 
@@ -206,12 +207,83 @@
         };
     }
 
+    // ---- Postflop: bet/check or raise/call/fold on flop and turn -----------
+    // Tier gates WHICH hand categories get served (clear-cut for beginners,
+    // marginal for advanced), never the rule itself — Postflop.getAction is
+    // the single answer key for grader and cheat sheet alike.
+    const POSTFLOP_TIER_CATEGORIES = {
+        beginner:     ['monster', 'strong', 'air'],
+        intermediate: ['monster', 'strong', 'strongDraw', 'weakDraw', 'air'],
+        advanced:     ['monster', 'strong', 'strongDraw', 'marginal', 'weakDraw', 'air']
+    };
+
+    // Random deals are ~80% air, which would make a dull drill — so, like the
+    // blackjack fabricators, pick the TARGET category first (uniform over the
+    // tier's list) and deal until the classifier produces it. Rare categories
+    // (strong ≈3% of deals) need the higher try budget; on exhaustion the last
+    // deal is served, which is still a validly graded scenario.
+    const POSTFLOP_DEAL_TRIES = 400;
+
+    function buildPostflop(tier) {
+        const allowed = POSTFLOP_TIER_CATEGORIES[tier] || POSTFLOP_TIER_CATEGORIES.beginner;
+        const target = pick(allowed);
+        let last = null;
+        for (let attempt = 0; attempt < POSTFLOP_DEAL_TRIES; attempt++) {
+            const d = Cards.createDealer();
+            const hole = d.draw(2);
+            const isTurn = tier === 'advanced' && Math.random() < 0.5;
+            const board = d.draw(isTurn ? 4 : 3);
+            const result = Postflop.classify(hole, board);
+
+            last = makePostflopScenario(tier, hole, board, result, isTurn);
+            if (result.category !== target) continue;
+            return last;
+        }
+        return last;
+    }
+
+    function makePostflopScenario(tier, hole, board, result, isTurn) {
+        const context = pick(Postflop.CONTEXTS);
+        const street = isTurn ? 'turn' : 'flop';
+        const correct = Postflop.getAction(result.category, context);
+        const info = Postflop.CATEGORY_INFO[result.category];
+
+        const situation = context === 'checkedTo'
+            ? 'Your opponent checks to you'
+            : 'Your opponent bets about half the pot';
+        const holding = result.made && result.draw
+            ? result.made + ' with ' + result.draw
+            : (result.made || result.draw || 'no pair and no draw');
+
+        return {
+            mode: 'postflop',
+            scenarioKey: 'postflop:' + result.category + ':' + context,
+            tier: tier,
+            prompt: situation + ' on the ' + street + ". What's your move?",
+            context: [
+                { label: 'Street', value: street },
+                { label: 'Facing', value: context === 'checkedTo' ? 'a check' : 'a bet' }
+            ],
+            cards: {
+                community: board,
+                hands: [{ label: 'Your hand', cards: hole }]
+            },
+            answers: context === 'checkedTo'
+                ? [{ id: 'bet', label: 'Bet' }, { id: 'check', label: 'Check' }]
+                : [{ id: 'raise', label: 'Raise' }, { id: 'call', label: 'Call' }, { id: 'fold', label: 'Fold' }],
+            correctId: correct,
+            explain: 'You have ' + holding + ' — ' + info.short.toLowerCase() +
+                     ' territory. ' + info.why
+        };
+    }
+
     // ---- Dispatch + Targeted picker ----------------------------------------
     function generate(mode, tier) {
         switch (mode) {
             case 'handRankings': return buildHandRankings(tier);
             case 'preflop':      return buildPreflop(tier);
             case 'potOdds':      return buildPotOdds(tier);
+            case 'postflop':     return buildPostflop(tier);
             default:             return buildHandRankings(tier);
         }
     }
@@ -256,7 +328,8 @@
         // exposed for testing / reuse
         buildHandRankings,
         buildPreflop,
-        buildPotOdds
+        buildPotOdds,
+        buildPostflop
     };
 
     PK.Scenarios = Scenarios;
