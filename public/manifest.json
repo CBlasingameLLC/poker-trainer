@@ -1,0 +1,16 @@
+{
+  "name": "Poker Trainer — Texas Hold'em Practice",
+  "short_name": "Poker Trainer",
+  "description": "Free Texas Hold'em No-Limit trainer: hand rankings, preflop ranges, and pot-odds drills with targeted practice and personal statistics.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0c",
+  "theme_color": "#0a0a0c",
+  "icons": [
+    { "src": "/icons/poker-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/poker-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/poker-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

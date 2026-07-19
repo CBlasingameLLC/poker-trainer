@@ -1,0 +1,49 @@
+/* Minimal base — box model reset + self-hosted variable fonts (offline-safe
+   for PWA / Capacitor, no CDN dependency). The app's visual identity (tokens +
+   components) lives entirely in poker.css. Unlike the sibling blackjack app,
+   we use NO Font Awesome CDN — all icons are inline SVG or unicode glyphs — so
+   nothing external is fetched at runtime and the service worker can cache the
+   whole shell. */
+
+/* ==========================================================================
+   SELF-HOSTED FONTS (shared identity with the blackjack trainer).
+   Both are Latin-subset VARIABLE fonts, so one file covers the whole weight
+   range.
+   ========================================================================== */
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;               /* variable */
+    font-display: swap;
+    src: url('/fonts/inter-var.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Playfair Display';
+    font-style: normal;
+    font-weight: 400 900;               /* variable */
+    font-display: swap;
+    src: url('/fonts/playfair-var.woff2') format('woff2');
+}
+
+/* ==========================================================================
+   RESET
+   ========================================================================== */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+}
+
+button {
+    font-family: inherit;
+}

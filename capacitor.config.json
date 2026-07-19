@@ -1,0 +1,6 @@
+{
+  "appId": "com.juntopress.poker",
+  "appName": "Poker Trainer",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

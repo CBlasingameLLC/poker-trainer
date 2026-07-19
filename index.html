@@ -1,0 +1,168 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>Poker Trainer — Texas Hold'em Practice</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="description" content="Free Texas Hold'em No-Limit trainer: hand rankings, preflop ranges, and pot-odds drills with targeted practice and personal statistics." />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/poker.css" />
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icons/poker-icon-192.png">
+    <link rel="apple-touch-icon" href="/icons/poker-icon-192.png">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Poker Trainer">
+    <meta name="theme-color" content="#0a0a0c">
+</head>
+<body>
+    <!-- Boot splash -->
+    <div id="boot-splash" class="boot-splash">
+        <h1 class="boot-splash__title">Poker<em>Trainer</em></h1>
+        <div class="boot-splash__spinner"></div>
+    </div>
+
+    <!-- ===================== HUB ===================== -->
+    <div id="main-menu" class="hidden">
+        <div class="hub__top">
+            <span class="hub__wordmark">Poker<em>Trainer</em></span>
+            <span class="hub__tagline">No-Limit Hold'em</span>
+        </div>
+
+        <div class="hub__body">
+            <!-- DRILLS -->
+            <section class="hub-panel" data-panel="drills">
+                <div class="hub-scroll">
+                    <h2 class="panel-title">Practice</h2>
+                    <p class="panel-sub">Pick a skill to drill. Your accuracy and weak spots are tracked automatically.</p>
+
+                    <div class="tier-select">
+                        <span class="tier-select__label">Difficulty</span>
+                        <div class="segmented" id="tier-seg">
+                            <button class="seg active" data-tier="beginner">Beginner</button>
+                            <button class="seg" data-tier="intermediate">Intermediate</button>
+                            <button class="seg" data-tier="advanced">Advanced</button>
+                        </div>
+                    </div>
+
+                    <div class="tile-grid">
+                        <button class="tile tile--rankings" data-mode="handRankings">
+                            <span class="tile__glyph">🃏</span>
+                            <span class="tile__name">Hand Rankings</span>
+                            <span class="tile__sub">Which hand wins? Learn the pecking order.</span>
+                        </button>
+                        <button class="tile tile--preflop" data-mode="preflop">
+                            <span class="tile__glyph">♠︎</span>
+                            <span class="tile__name">Preflop Ranges</span>
+                            <span class="tile__sub">Raise, call, or fold from every seat.</span>
+                        </button>
+                        <button class="tile tile--odds" data-mode="potOdds">
+                            <span class="tile__glyph">🧮</span>
+                            <span class="tile__name">Pot Odds</span>
+                            <span class="tile__sub">Is the call profitable? Do the math.</span>
+                        </button>
+                        <button class="tile tile--targeted" id="tile-targeted" data-mode="targeted" disabled>
+                            <span class="tile__badge" id="targeted-badge">Locked</span>
+                            <span class="tile__glyph">🎯</span>
+                            <span class="tile__name">Targeted Practice</span>
+                            <span class="tile__sub">Re-drills the hands you miss most.</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CHARTS -->
+            <section class="hub-panel" data-panel="charts">
+                <div class="hub-scroll" id="charts-scroll">
+                    <h2 class="panel-title">Reference</h2>
+                    <p class="panel-sub">Cheat sheets rendered from the same data that grades your drills.</p>
+                    <!-- reference-render.js fills this -->
+                </div>
+            </section>
+
+            <!-- STATS -->
+            <section class="hub-panel" data-panel="stats">
+                <div class="hub-scroll" id="stats-scroll">
+                    <!-- stats-render.js fills this on open -->
+                </div>
+            </section>
+
+            <!-- SETTINGS -->
+            <section class="hub-panel" data-panel="settings">
+                <div class="hub-scroll">
+                    <h2 class="panel-title">Settings</h2>
+                    <label class="settings-row">
+                        <input type="checkbox" id="set-sound">
+                        <span class="settings-row__text">Sound effects
+                            <span class="settings-row__sub">Play a tone on correct / wrong answers.</span>
+                        </span>
+                    </label>
+                    <label class="settings-row">
+                        <input type="checkbox" id="set-adaptive">
+                        <span class="settings-row__text">Adaptive difficulty
+                            <span class="settings-row__sub">Nudge difficulty toward your weak spots as you play.</span>
+                        </span>
+                    </label>
+                    <label class="settings-row">
+                        <input type="checkbox" id="set-explain">
+                        <span class="settings-row__text">Always show explanations
+                            <span class="settings-row__sub">Show the reasoning even when you answer correctly.</span>
+                        </span>
+                    </label>
+                    <button class="link-btn" id="btn-clear-history">Clear all statistics</button>
+                    <p class="stats-note">Poker Trainer stores everything on this device only — no account, no server.</p>
+                </div>
+            </section>
+        </div>
+
+        <nav class="hub__nav">
+            <button class="hub-tab active" data-tab="drills"><span class="hub-tab__glyph">🎴</span>Practice</button>
+            <button class="hub-tab" data-tab="charts"><span class="hub-tab__glyph">📊</span>Charts</button>
+            <button class="hub-tab" data-tab="stats"><span class="hub-tab__glyph">📈</span>Stats</button>
+            <button class="hub-tab" data-tab="settings"><span class="hub-tab__glyph">⚙️</span>Settings</button>
+        </nav>
+    </div>
+
+    <!-- ===================== DRILL SCREEN ===================== -->
+    <div id="drill-container">
+        <div class="topbar">
+            <button class="text-btn" id="btn-drill-back">‹ Menu</button>
+            <span class="topbar__title" id="drill-title">Drill</span>
+            <span class="accuracy-pill" id="drill-accuracy">—</span>
+        </div>
+
+        <div class="drill-body">
+            <div class="drill-prompt" id="drill-prompt"></div>
+            <div class="drill-context" id="drill-context"></div>
+            <div class="board" id="drill-board"></div>
+            <div class="feedback hidden" id="drill-feedback">
+                <div class="feedback__verdict" id="feedback-verdict"></div>
+                <div class="feedback__detail" id="feedback-detail"></div>
+            </div>
+        </div>
+
+        <div class="answer-dock">
+            <div class="answer-grid" id="answer-grid"></div>
+        </div>
+    </div>
+
+    <!-- ===================== SCRIPTS (order matters) ===================== -->
+    <!-- Pure logic (DOM-free, also module.exports for Node verification) -->
+    <script defer src="/js/poker/cards.js"></script>
+    <script defer src="/js/poker/hand-eval.js"></script>
+    <script defer src="/js/poker/ranges.js"></script>
+    <script defer src="/js/poker/odds.js"></script>
+    <script defer src="/js/poker/persistence.js"></script>
+    <script defer src="/js/poker/scenarios.js"></script>
+    <script defer src="/js/poker/drill-manager.js"></script>
+    <!-- Presentation -->
+    <script defer src="/js/poker/audio.js"></script>
+    <script defer src="/js/poker/render.js"></script>
+    <script defer src="/js/poker/reference-render.js"></script>
+    <script defer src="/js/poker/stats-render.js"></script>
+    <script defer src="/js/poker/ui-bindings.js"></script>
+    <script defer src="/js/poker/hub.js"></script>
+    <script defer src="/js/poker/boot.js"></script>
+</body>
+</html>
