@@ -69,12 +69,22 @@
         bindCheckbox('set-adaptive', 'adaptive');
         bindCheckbox('set-explain', 'alwaysExplain');
 
+        const goalSelect = byId('set-daily-goal');
+        goalSelect.value = String(PK.Storage.getSettings().dailyGoal || 20);
+        goalSelect.addEventListener('change', () => {
+            const s = PK.Storage.getSettings();
+            s.dailyGoal = parseInt(goalSelect.value, 10) || 20;
+            PK.Storage.setSettings(s);
+            PK.Hub.renderDailyCard();
+        });
+
         byId('btn-clear-history').addEventListener('click', () => {
             const ok = window.confirm('Clear all statistics and mistake history? This cannot be undone.');
             if (!ok) return;
             PK.Storage.clearHistory();
             PK.StatsRender.render(byId('stats-scroll'));
             PK.Hub.syncTargetedTile();
+            PK.Hub.renderDailyCard();
         });
 
         // Safety net: if Targeted Practice is entered with nothing logged, bail

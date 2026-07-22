@@ -86,6 +86,31 @@
         return section;
     }
 
+    function buildStreaks() {
+        const section = el('div', 'stats-section');
+        section.appendChild(el('div', 'stats-section-title', 'Streaks'));
+
+        const streak = PK.Storage.getStreak();
+        const daily = PK.Storage.getDaily();
+        const dayStreak = PK.Progress
+            ? PK.Progress.activeDayStreak(daily, PK.Progress.todayStr())
+            : (daily.dayStreak || 0);
+
+        const grid = el('div', 'streak-grid');
+        [
+            { label: 'Current run', value: streak.current, unit: streak.current === 1 ? 'correct' : 'correct' },
+            { label: 'Best run', value: streak.best, unit: 'correct' },
+            { label: 'Day streak', value: dayStreak, unit: dayStreak === 1 ? 'day' : 'days' }
+        ].forEach(s => {
+            const cell = el('div', 'streak-cell');
+            cell.appendChild(el('span', 'streak-cell__value', String(s.value)));
+            cell.appendChild(el('span', 'streak-cell__label', s.label));
+            grid.appendChild(cell);
+        });
+        section.appendChild(grid);
+        return section;
+    }
+
     function buildBars(lifetime) {
         const section = el('div', 'stats-section');
         section.appendChild(el('div', 'stats-section-title', 'Accuracy by drill'));
@@ -251,6 +276,7 @@
         const log = PK.Storage.getMistakeLog();
 
         container.appendChild(buildHeadline(lifetime));
+        container.appendChild(buildStreaks());
         container.appendChild(buildBars(lifetime));
         container.appendChild(buildTrend(history));
         container.appendChild(buildWeakSpots(log));

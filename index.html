@@ -37,6 +37,20 @@
                     <h2 class="panel-title">Practice</h2>
                     <p class="panel-sub">Pick a skill to drill. Your accuracy and weak spots are tracked automatically.</p>
 
+                    <div class="daily-card" id="daily-card">
+                        <div class="daily-ring" id="daily-ring">
+                            <svg viewBox="0 0 44 44" class="daily-ring__svg">
+                                <circle class="daily-ring__track" cx="22" cy="22" r="19"></circle>
+                                <circle class="daily-ring__fill" id="daily-ring-fill" cx="22" cy="22" r="19"></circle>
+                            </svg>
+                            <span class="daily-ring__label" id="daily-ring-label">0%</span>
+                        </div>
+                        <div class="daily-card__text">
+                            <div class="daily-card__goal"><b id="daily-count">0</b> / <span id="daily-goal">20</span> hands today</div>
+                            <div class="daily-card__streak" id="daily-streak-line">Play a hand to start your day streak 🔥</div>
+                        </div>
+                    </div>
+
                     <div class="tier-select">
                         <span class="tier-select__label">Difficulty</span>
                         <div class="segmented" id="tier-seg">
@@ -115,6 +129,17 @@
                             <span class="settings-row__sub">Show the reasoning even when you answer correctly.</span>
                         </span>
                     </label>
+                    <label class="settings-row settings-row--select">
+                        <span class="settings-row__text">Daily goal
+                            <span class="settings-row__sub">Hands per day to close your streak ring.</span>
+                        </span>
+                        <select id="set-daily-goal" class="settings-select">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                        </select>
+                    </label>
                     <button class="link-btn" id="btn-clear-history">Clear all statistics</button>
                     <p class="stats-note">Poker Trainer stores everything on this device only — no account, no server.</p>
                 </div>
@@ -134,7 +159,10 @@
         <div class="topbar">
             <button class="text-btn" id="btn-drill-back">‹ Menu</button>
             <span class="topbar__title" id="drill-title">Drill</span>
-            <span class="accuracy-pill" id="drill-accuracy">—</span>
+            <span class="topbar__group--right">
+                <span class="streak-pill" id="drill-streak" title="Correct-answer streak"><span class="streak-pill__flame">🔥</span><span id="drill-streak-n">0</span></span>
+                <span class="accuracy-pill" id="drill-accuracy" title="Session accuracy">—%</span>
+            </span>
         </div>
 
         <div class="drill-body">
@@ -159,6 +187,7 @@
     <script defer src="/js/poker/ranges.js"></script>
     <script defer src="/js/poker/odds.js"></script>
     <script defer src="/js/poker/postflop.js"></script>
+    <script defer src="/js/poker/progress.js"></script>
     <script defer src="/js/poker/persistence.js"></script>
     <script defer src="/js/poker/scenarios.js"></script>
     <script defer src="/js/poker/drill-manager.js"></script>

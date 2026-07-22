@@ -8,7 +8,7 @@
 // not precached. Bump CACHE_VERSION to roll out new assets.
 // ==========================================
 
-const CACHE_VERSION = 'poker-trainer-v2';
+const CACHE_VERSION = 'poker-trainer-v3';
 const APP_SHELL = [
     '/',
     '/index.html',
@@ -24,6 +24,7 @@ const APP_SHELL = [
     '/js/poker/ranges.js',
     '/js/poker/odds.js',
     '/js/poker/postflop.js',
+    '/js/poker/progress.js',
     '/js/poker/persistence.js',
     '/js/poker/scenarios.js',
     '/js/poker/drill-manager.js',

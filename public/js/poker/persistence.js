@@ -39,7 +39,8 @@
             soundEnabled: false,
             adaptive: true,      // nudge difficulty toward weak spots
             alwaysExplain: false, // show reasoning even on correct answers
-            tier: 'beginner'    // last-used manual difficulty
+            tier: 'beginner',   // last-used manual difficulty
+            dailyGoal: 20       // hands per day for the daily-goal ring
         };
     }
 
@@ -140,12 +141,29 @@
             return log;
         },
 
+        // Streak { current, best } and daily-goal { date, count, dayStreak,
+        // lastMetDate } state — shapes owned by progress.js, persisted here.
+        getStreak() {
+            return this.get('streak', { current: 0, best: 0 });
+        },
+        setStreak(streak) {
+            return this.set('streak', streak);
+        },
+        getDaily() {
+            return this.get('daily', { date: null, count: 0, dayStreak: 0, lastMetDate: null });
+        },
+        setDaily(daily) {
+            return this.set('daily', daily);
+        },
+
         // Wipe everything the "Clear all statistics" control resets.
         clearHistory() {
             this.setLifetimeStats(defaultStatsBucket());
             this.setSessionStats(defaultStatsBucket());
             this.set('mistake_log', []);
             this.set('accuracy_history', []);
+            this.setStreak({ current: 0, best: 0 });
+            this.setDaily({ date: null, count: 0, dayStreak: 0, lastMetDate: null });
         },
 
         // Version ladder stub — seeds schema_version so future migrations have

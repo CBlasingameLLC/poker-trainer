@@ -22,6 +22,7 @@
 
     var Scenarios = PK.Scenarios;
     var Storage = PK.Storage;
+    var Progress = PK.Progress;
 
     const subscribers = [];
     let state = { mode: null, tier: 'beginner', scenario: null, answered: false };
@@ -83,13 +84,16 @@
         // Record under the active drill mode ('targeted' counts as its own
         // bucket); a missed targeted question still logs its ORIGINAL scenario
         // (scenario.mode) so the weighted pool keeps feeding itself.
-        _recordDecision(state.mode, correct);
+        const progress = _recordDecision(state.mode, correct);
         if (!correct) logMistake(scenario, selectedId);
 
-        emit('graded', { scenario, selectedId, correct });
+        emit('graded', { scenario, selectedId, correct, progress });
+        emit('progress', progress);
     }
 
     // The single stats write path (mirrors blackjack `_recordDecision`).
+    // Also advances the streak + daily-goal state (progress.js) and returns a
+    // snapshot the UI uses to animate the streak pill / daily ring.
     function _recordDecision(mode, correct) {
         bump(sessionStats, mode, correct);
         Storage.setSessionStats(sessionStats);
@@ -99,6 +103,24 @@
         Storage.setLifetimeStats(lifetime);
 
         Storage.pushDecision({ t: Date.now(), correct: !!correct, mode });
+
+        const today = Progress.todayStr();
+        const streak = Progress.nextStreak(Storage.getStreak(), correct);
+        Storage.setStreak(streak);
+
+        const goal = Storage.getSettings().dailyGoal || 20;
+        const daily = Progress.recordDaily(Storage.getDaily(), goal, today);
+        Storage.setDaily(daily.daily);
+
+        return {
+            streak: streak,
+            streakUp: correct && streak.current > 1,
+            streakBroken: !correct,
+            daily: daily.daily,
+            dayStreak: Progress.activeDayStreak(daily.daily, today),
+            goal: goal,
+            goalMetNow: daily.metNow
+        };
     }
 
     function bump(bucket, mode, correct) {
@@ -131,6 +153,18 @@
         return Math.round((sessionStats.decisionsCorrect / sessionStats.decisionsTotal) * 100);
     }
 
+    // Current streak + daily snapshot for the UI, without recording a decision.
+    function progressSnapshot() {
+        const today = Progress.todayStr();
+        const daily = Storage.getDaily();
+        return {
+            streak: Storage.getStreak(),
+            daily: daily,
+            dayStreak: Progress.activeDayStreak(daily, today),
+            goal: Storage.getSettings().dailyGoal || 20
+        };
+    }
+
     PK.DrillManager = {
         subscribe,
         init,
@@ -140,6 +174,7 @@
         setTier,
         getTier,
         getState,
-        sessionAccuracy
+        sessionAccuracy,
+        progressSnapshot
     };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
