@@ -642,6 +642,69 @@ body {
 .odds-table td:first-child { color: var(--text-hi); font-weight: 700; }
 
 /* =========================================
+   9b. LEARN  (accordion primers)
+   ========================================= */
+.learn-item {
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    background: var(--surface-2);
+    margin-bottom: 0.6em;
+    overflow: hidden;
+}
+.learn-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    padding: 0.85em 0.9em;
+    cursor: pointer;
+    list-style: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.learn-summary::-webkit-details-marker { display: none; }
+.learn-summary__icon { font-size: 1.3em; flex: 0 0 auto; }
+.learn-summary__head { display: flex; flex-direction: column; gap: 0.1em; flex: 1 1 auto; min-width: 0; }
+.learn-summary__title { font-weight: 700; font-size: 0.95em; color: var(--text-hi); }
+.learn-summary__sub { font-size: 0.74em; color: var(--text-lo); }
+.learn-summary__chev {
+    flex: 0 0 auto;
+    color: var(--gold);
+    font-size: 1.3em;
+    transition: transform 0.2s ease;
+}
+.learn-item[open] .learn-summary__chev { transform: rotate(90deg); }
+.learn-body { padding: 0 0.9em 0.9em; }
+
+.learn-p { font-size: 0.85em; color: var(--text-mid); line-height: 1.55; margin: 0 0 0.6em; }
+
+.learn-steps { list-style: none; counter-reset: step; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6em; }
+.learn-step { counter-increment: step; display: flex; flex-direction: column; gap: 0.15em; padding-left: 2.1em; position: relative; }
+.learn-step::before {
+    content: counter(step);
+    position: absolute;
+    left: 0; top: 0;
+    width: 1.5em; height: 1.5em;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface-3);
+    border: 1px solid var(--gold-line);
+    border-radius: 50%;
+    color: var(--gold);
+    font-family: var(--font-mono);
+    font-size: 0.72em;
+    font-weight: 700;
+}
+.learn-step__label { font-weight: 700; font-size: 0.85em; color: var(--gold-strong); }
+.learn-step__text { font-size: 0.82em; color: var(--text-mid); line-height: 1.5; }
+
+.learn-terms { margin: 0; }
+.learn-term { font-weight: 700; font-size: 0.85em; color: var(--text-hi); margin-top: 0.6em; }
+.learn-terms .learn-term:first-child { margin-top: 0; }
+.learn-def { margin: 0.1em 0 0; font-size: 0.82em; color: var(--text-mid); line-height: 1.5; }
+
+.learn-rank { margin: 0 0 0.6em; padding-left: 1.4em; }
+.learn-rank__item { font-size: 0.86em; color: var(--text-hi); padding: 0.15em 0; }
+.learn-rank__item::marker { color: var(--gold); font-family: var(--font-mono); }
+
+/* =========================================
    10. STATS  (mirrors blackjack stats-render)
    ========================================= */
 .stats-section { margin-bottom: 1.6em; }

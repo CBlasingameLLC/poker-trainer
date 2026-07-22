@@ -26,6 +26,8 @@
             PK.ReferenceRender.render(els.chartsScroll, PK.DrillManager.getTier());
         } else if (tab === 'stats') {
             PK.StatsRender.render(els.statsScroll);
+        } else if (tab === 'learn') {
+            PK.LearnRender.render(els.learnScroll);
         } else if (tab === 'drills') {
             syncTargetedTile();
             renderDailyCard();
@@ -93,6 +95,7 @@
         els.tierSegs = Array.from(document.querySelectorAll('#tier-seg .seg'));
         els.chartsScroll = document.getElementById('charts-scroll');
         els.statsScroll = document.getElementById('stats-scroll');
+        els.learnScroll = document.getElementById('learn-scroll');
         els.targetedTile = document.getElementById('tile-targeted');
         els.targetedBadge = document.getElementById('targeted-badge');
         els.dailyCard = document.getElementById('daily-card');
