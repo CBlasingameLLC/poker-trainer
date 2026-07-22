@@ -18,6 +18,7 @@
     const MODE_TITLES = {
         handRankings: 'Hand Rankings',
         preflop: 'Preflop Ranges',
+        preflopDefense: 'Facing a Raise',
         potOdds: 'Pot Odds',
         postflop: 'Postflop Decisions',
         countOuts: 'Count the Outs',

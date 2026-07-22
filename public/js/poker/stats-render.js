@@ -28,6 +28,7 @@
     const MODE_LABELS = {
         handRankings: 'Hand Rankings',
         preflop: 'Preflop Ranges',
+        preflopDefense: 'Facing a Raise',
         potOdds: 'Pot Odds',
         postflop: 'Postflop',
         countOuts: 'Count Outs',
@@ -60,6 +61,9 @@
         }
         if (parts[0] === 'preflop') {
             return 'Preflop: ' + parts[2] + ' from ' + parts[1];
+        }
+        if (parts[0] === 'preflopDefense') {
+            return 'Facing a raise: ' + parts[2] + ' vs ' + parts[1];
         }
         if (parts[0] === 'potOdds') {
             return 'Pot odds: ' + parts.slice(1).join(':');

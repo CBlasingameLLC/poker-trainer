@@ -96,6 +96,41 @@
         return block;
     }
 
+    // Facing-a-raise response grids (3-bet / call / fold) per opener bucket.
+    function buildResponseGrids(tier) {
+        const block = el('div', 'ref-block');
+        block.appendChild(el('h3', null, 'Facing a raise — ' + capitalize(tier)));
+        block.appendChild(el('p', 'panel-sub',
+            'A player has opened; the action is on you. Green = 3-bet, gold = call, grey = fold. ' +
+            'Respond tighter to an early-position open than a late one.'));
+
+        Ranges.BUCKETS.forEach(bucket => {
+            const sub = el('div', 'ref-block');
+            sub.appendChild(el('h3', null, 'vs. ' + capitalize(Ranges.BUCKET_LABELS[bucket]) + ' open'));
+            const wrap = el('div', 'range-grid-wrap');
+            const grid = el('div', 'range-grid');
+            Ranges.R_DESC.forEach(rowRank => {
+                Ranges.R_DESC.forEach(colRank => {
+                    const cls = Ranges.gridClass(rowRank, colRank);
+                    const resp = Ranges.getResponseForClass(cls, bucket, tier);
+                    const cellClass = resp === '3bet' ? 'rg-raise' : (resp === 'call' ? 'rg-call' : 'rg-fold');
+                    grid.appendChild(el('div', 'rg-cell ' + cellClass, cls));
+                });
+            });
+            wrap.appendChild(grid);
+            sub.appendChild(wrap);
+            block.appendChild(sub);
+        });
+
+        const legend = el('div', 'rg-legend');
+        legend.innerHTML =
+            '<span><span class="rg-swatch rg-raise"></span>3-bet</span>' +
+            '<span><span class="rg-swatch rg-call"></span>Call</span>' +
+            '<span><span class="rg-swatch rg-fold"></span>Fold</span>';
+        block.appendChild(legend);
+        return block;
+    }
+
     function buildPotOdds() {
         const block = el('div', 'ref-block');
         block.appendChild(el('h3', null, 'Equity from outs (rule of 2 & 4)'));
@@ -181,6 +216,7 @@
         if (heading) container.appendChild(heading);
         if (intro) container.appendChild(intro);
         container.appendChild(buildRangeGrids(tier));
+        container.appendChild(buildResponseGrids(tier));
         container.appendChild(buildPostflopSheet());
         container.appendChild(buildRankings());
         container.appendChild(buildPotOdds());

@@ -28,7 +28,7 @@
 
     // Graded modes. `recordDecision` also creates missing buckets on the fly,
     // so this is for a clean default shape / stable ordering, not correctness.
-    const MODES = ['handRankings', 'preflop', 'potOdds', 'postflop', 'countOuts', 'targeted'];
+    const MODES = ['handRankings', 'preflop', 'preflopDefense', 'potOdds', 'postflop', 'countOuts', 'targeted'];
 
     function hasLocalStorage() {
         return typeof localStorage !== 'undefined' && localStorage !== null;

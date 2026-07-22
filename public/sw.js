@@ -8,7 +8,7 @@
 // not precached. Bump CACHE_VERSION to roll out new assets.
 // ==========================================
 
-const CACHE_VERSION = 'poker-trainer-v5';
+const CACHE_VERSION = 'poker-trainer-v6';
 const APP_SHELL = [
     '/',
     '/index.html',
