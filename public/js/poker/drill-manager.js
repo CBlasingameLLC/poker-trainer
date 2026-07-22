@@ -153,6 +153,25 @@
         return Math.round((sessionStats.decisionsCorrect / sessionStats.decisionsTotal) * 100);
     }
 
+    // Record one graded decision made inside Play-a-Hand. Routes through the
+    // same single write path (stats + streak + daily) and logs a mistake so
+    // full-hand play feeds weak spots and Targeted Practice too.
+    function recordPlayDecision(info) {
+        const progress = _recordDecision('playHand', info.correct);
+        if (!info.correct) {
+            Storage.pushMistake({
+                timestamp: Date.now(),
+                mode: 'playHand',
+                scenarioKey: 'playHand:' + info.kind,
+                prompt: info.prompt,
+                yourAnswer: info.yourAnswer,
+                correctAnswer: info.correctAnswer,
+                scenario: null
+            });
+        }
+        return progress;
+    }
+
     // Current streak + daily snapshot for the UI, without recording a decision.
     function progressSnapshot() {
         const today = Progress.todayStr();
@@ -175,6 +194,7 @@
         getTier,
         getState,
         sessionAccuracy,
-        progressSnapshot
+        progressSnapshot,
+        recordPlayDecision
     };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

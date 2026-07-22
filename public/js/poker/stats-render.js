@@ -32,6 +32,7 @@
         potOdds: 'Pot Odds',
         postflop: 'Postflop',
         countOuts: 'Count Outs',
+        playHand: 'Play a Hand',
         targeted: 'Targeted'
     };
 
@@ -70,6 +71,13 @@
         }
         if (parts[0] === 'countOuts') {
             return 'Outs: ' + parts.slice(1).join(':');
+        }
+        if (parts[0] === 'playHand') {
+            const map = {
+                'preflop-open': 'Play: preflop open', 'preflop-response': 'Play: facing a raise',
+                'postflop-checked': 'Play: checked to you', 'postflop-facing': 'Play: facing a bet'
+            };
+            return map[parts[1]] || 'Play a hand';
         }
         if (parts[0] === 'postflop') {
             const info = PK.Postflop && PK.Postflop.CATEGORY_INFO[parts[1]];

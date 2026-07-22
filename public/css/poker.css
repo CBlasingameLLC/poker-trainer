@@ -644,6 +644,163 @@ body {
 .odds-table td:first-child { color: var(--text-hi); font-weight: 700; }
 
 /* =========================================
+   8b. PLAY-A-HAND TABLE
+   ========================================= */
+/* Practice-tab CTA that opens the table */
+.play-cta {
+    display: flex;
+    align-items: center;
+    gap: 0.9em;
+    width: 100%;
+    margin-top: 0.9em;
+    padding: 0.9em 1em;
+    border: 1px solid var(--gold-line);
+    border-radius: var(--r-lg);
+    background: linear-gradient(150deg, rgba(227,193,111,0.10) 0%, var(--surface-2) 70%);
+    color: var(--text-hi);
+    font-family: var(--font-ui);
+    cursor: pointer;
+    text-align: left;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.play-cta:hover { transform: translateY(-2px); border-color: var(--gold); }
+.play-cta__glyph {
+    flex: 0 0 auto;
+    width: 2.2em; height: 2.2em;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--gold-strong) 0%, var(--gold-deep) 100%);
+    color: #201700;
+    font-size: 0.9em;
+}
+.play-cta__text { display: flex; flex-direction: column; gap: 0.1em; }
+.play-cta__title { font-family: var(--font-display); font-size: 1.05em; font-weight: 700; color: var(--gold-strong); }
+.play-cta__sub { font-size: 0.74em; color: var(--text-lo); }
+
+#table-container {
+    position: fixed;
+    inset: 0;
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    background:
+        radial-gradient(120% 78% at 50% 30%, var(--felt-glow) 0%, rgba(12, 26, 20, 0.30) 42%, rgba(10, 10, 12, 0) 72%),
+        var(--bg-base);
+    z-index: 320;
+}
+#table-container.active { display: flex; }
+
+.table-felt {
+    flex: 1 1 auto;
+    min-height: 0;
+    position: relative;
+    margin: 0.4em 0.6em;
+}
+.table-seats { position: absolute; inset: 0; }
+.table-seat {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 30%;
+    max-width: 132px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2em;
+    text-align: center;
+}
+.table-seat__pos {
+    font-family: var(--font-mono);
+    font-size: 0.62em;
+    letter-spacing: 0.3px;
+    color: var(--text-mid);
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    padding: 0.15em 0.55em;
+    border-radius: var(--r-pill);
+}
+.table-seat--hero .table-seat__pos { color: var(--gold); border-color: var(--gold-line); }
+.table-seat--acting .table-seat__pos { box-shadow: 0 0 0 2px var(--gold-line); color: var(--gold-strong); }
+.table-seat--winner .table-seat__pos { color: var(--win); border-color: rgba(70,201,138,0.5); }
+.table-seat__cards { display: flex; gap: 2px; min-height: 1px; }
+.table-seat--folded { opacity: 0.4; }
+.table-seat__action { font-size: 0.6em; color: var(--gold); font-family: var(--font-mono); min-height: 0.9em; }
+.table-seat__hand { font-size: 0.56em; color: var(--text-mid); }
+
+/* Slot placement (slot 0 = hero, bottom center; clockwise) */
+.seat-slot-0 { left: 50%; top: 92%; }
+.seat-slot-1 { left: 15%; top: 74%; }
+.seat-slot-2 { left: 12%; top: 30%; }
+.seat-slot-3 { left: 50%; top: 8%; }
+.seat-slot-4 { left: 88%; top: 30%; }
+.seat-slot-5 { left: 85%; top: 74%; }
+
+.table-center {
+    position: absolute;
+    top: 46%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5em;
+    width: 100%;
+}
+.table-pot {
+    font-family: var(--font-mono);
+    font-size: 0.78em;
+    color: var(--gold);
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--gold-line);
+    padding: 0.2em 0.8em;
+    border-radius: var(--r-pill);
+}
+/* override the drill screen's column .board */
+#table-board { display: flex; flex-direction: row; gap: 0.3em; justify-content: center; flex-wrap: nowrap; height: auto; padding-left: 0; }
+
+/* Mini cards for seats */
+.pcard--mini {
+    width: 26px;
+    height: 36px;
+    border-radius: 4px;
+    padding: 2px 3px;
+    font-size: 0.7em;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    animation: none;
+}
+.pcard--mini .pcard__corner { font-size: 0.85em; }
+/* Board cards — between mini and full */
+.pcard--board {
+    width: 38px;
+    height: 54px;
+    border-radius: 5px;
+    padding: 3px 4px;
+    font-size: 0.78em;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.45);
+}
+.pcard--board .pcard__pip { font-size: 1.4em; }
+
+.table-dock {
+    flex: 0 0 auto;
+    background: linear-gradient(180deg, rgba(16,16,19,0.65) 0%, var(--surface-1) 45%);
+    border-top: 1px solid var(--hairline);
+    padding: 0.7em 1em;
+    padding-bottom: max(0.9em, env(safe-area-inset-bottom));
+    box-shadow: 0 -14px 30px rgba(0, 0, 0, 0.35);
+}
+.table-log {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05em;
+    max-height: 4.6em;
+    overflow: hidden;
+    margin-bottom: 0.4em;
+}
+.table-log__line { font-family: var(--font-mono); font-size: 0.7em; color: var(--text-lo); }
+.table-log__line--hero { color: var(--gold); }
+.table-prompt { font-size: 0.92em; color: var(--text-hi); line-height: 1.4; margin-bottom: 0.5em; text-align: center; }
+.table-dock .feedback { margin-bottom: 0.5em; }
+.table-dock .answer-grid { margin-top: 0.2em; }
+
+/* =========================================
    9b. LEARN  (accordion primers)
    ========================================= */
 .learn-item {

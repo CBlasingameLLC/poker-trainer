@@ -19,8 +19,19 @@ adaptive weak-spot mode:
 - **Postflop Decisions** — real flop/turn spots: classify your hand (monster,
   strong, strong draw, marginal, weak draw, air) and bet, check, raise, call,
   or fold. Advanced tier mixes in turn boards and marginal hands.
+- **Facing a Raise** — someone opens; you 3-bet, call, or fold. Response ranges
+  bucketed by the opener's position.
+- **Count the Outs** — how many cards complete your draw? Exact out counts for
+  straight/flush draws and combos.
+- **Play a Full Hand** — sit at a 6-handed table (the six taught positions) and
+  play a hand deal-to-showdown against rule-based bots; every decision is
+  coached and graded by the same engines. The capstone that ties the drills
+  together.
 - **Targeted Practice** — re-drills the exact spots you miss most, weighted by
   how often you miss them. Unlocks once you've logged a mistake.
+
+Plus **streaks & daily goals** (a correct-answer streak, a daily-goal ring, a
+day streak) and a **Learn** tab of beginner primers.
 
 **Stats** track lifetime accuracy, per-drill accuracy, an accuracy trend, your
 weak spots, and a recent-miss log. **Charts** render cheat sheets (hand
@@ -37,9 +48,10 @@ support. Wrappable in Capacitor (`com.juntopress.poker`).
 
 ```
 public/js/poker/
-  cards.js hand-eval.js ranges.js odds.js postflop.js   # pure, DOM-free logic
+  cards.js hand-eval.js ranges.js odds.js   # pure, DOM-free logic...
+  postflop.js progress.js table.js          # ...also module.exports for harnesses
   scenarios.js drill-manager.js             # fabricate + grade + record
-  render.js reference-render.js stats-render.js
+  render.js reference-render.js stats-render.js learn-render.js table-render.js
   ui-bindings.js hub.js boot.js audio.js
   persistence.js                            # PK.Storage (junto_poker_ keys)
 ```

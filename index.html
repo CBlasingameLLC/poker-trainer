@@ -98,6 +98,14 @@
                             <span class="tile__sub">Re-drills the hands you miss most.</span>
                         </button>
                     </div>
+
+                    <button class="play-cta" id="btn-play-hand">
+                        <span class="play-cta__glyph">▶</span>
+                        <span class="play-cta__text">
+                            <span class="play-cta__title">Play a Full Hand</span>
+                            <span class="play-cta__sub">Sit at a 6-handed table — every decision coached</span>
+                        </span>
+                    </button>
                 </div>
             </section>
 
@@ -198,6 +206,35 @@
         </div>
     </div>
 
+    <!-- ===================== PLAY-A-HAND TABLE ===================== -->
+    <div id="table-container">
+        <div class="topbar">
+            <button class="text-btn" id="btn-table-back">‹ Menu</button>
+            <span class="topbar__title">Play a Hand</span>
+            <span class="topbar__group--right">
+                <span class="streak-pill" id="table-streak"><span class="streak-pill__flame">🔥</span><span id="table-streak-n">0</span></span>
+            </span>
+        </div>
+
+        <div class="table-felt">
+            <div class="table-seats" id="table-seats"></div>
+            <div class="table-center">
+                <div class="table-pot" id="table-pot">Pot 1.5 BB</div>
+                <div class="board" id="table-board"></div>
+            </div>
+        </div>
+
+        <div class="table-dock">
+            <div class="table-log" id="table-log"></div>
+            <div class="table-prompt" id="table-prompt"></div>
+            <div class="feedback hidden" id="table-feedback">
+                <div class="feedback__verdict" id="table-verdict"></div>
+                <div class="feedback__detail" id="table-detail"></div>
+            </div>
+            <div class="answer-grid" id="table-actions"></div>
+        </div>
+    </div>
+
     <!-- ===================== SCRIPTS (order matters) ===================== -->
     <!-- Pure logic (DOM-free, also module.exports for Node verification) -->
     <script defer src="/js/poker/cards.js"></script>
@@ -206,6 +243,7 @@
     <script defer src="/js/poker/odds.js"></script>
     <script defer src="/js/poker/postflop.js"></script>
     <script defer src="/js/poker/progress.js"></script>
+    <script defer src="/js/poker/table.js"></script>
     <script defer src="/js/poker/persistence.js"></script>
     <script defer src="/js/poker/scenarios.js"></script>
     <script defer src="/js/poker/drill-manager.js"></script>
@@ -215,6 +253,7 @@
     <script defer src="/js/poker/reference-render.js"></script>
     <script defer src="/js/poker/stats-render.js"></script>
     <script defer src="/js/poker/learn-render.js"></script>
+    <script defer src="/js/poker/table-render.js"></script>
     <script defer src="/js/poker/ui-bindings.js"></script>
     <script defer src="/js/poker/hub.js"></script>
     <script defer src="/js/poker/boot.js"></script>

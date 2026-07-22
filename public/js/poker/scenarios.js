@@ -200,8 +200,9 @@
                 { id: 'fold', label: 'Fold' }
             ],
             correctId: correct,
-            explain: cls + ' versus a ' + Ranges.BUCKET_LABELS[bucket] +
-                     ' open plays as a ' + actionWord + ' at the ' + tier + ' level.'
+            explain: cls + ' versus ' + (bucket === 'early' ? 'an' : 'a') + ' ' +
+                     Ranges.BUCKET_LABELS[bucket] + ' open plays as a ' + actionWord +
+                     ' at the ' + tier + ' level.'
         };
     }
 
