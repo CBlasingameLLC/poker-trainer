@@ -58,6 +58,18 @@ assert(cat('Ah Ad', 'Kh 8c 2d 4s') === 'strong', 'overpair on the turn -> strong
 assert(cat('Ac 4c', '9c 6c 2h 8d') === 'strongDraw', 'flush draw on the turn -> strongDraw');
 assert(cat('Th 9h', '8s 7d 6c 2h') === 'monster', 'made straight on the turn -> monster');
 
+console.log('\npostflop.js — draw out counts (Count-the-Outs)');
+function outs(holeStr, boardStr) { return PF.countDrawOuts(hand(holeStr), hand(boardStr)); }
+assert(outs('Ac 4c', '9c 6c 2h') === 9, 'flush draw -> 9 outs');
+assert(outs('9s 8s', '7h 6d 2c') === 8, 'open-ended straight draw -> 8 outs');
+assert(outs('Jh Td', '8s 7c 2h') === 4, 'gutshot (needs a 9) -> 4 outs');
+assert(outs('Ah Kh', 'Qh Jh 2c') === 12, 'flush draw + gutshot (broadway) -> 12 outs');
+assert(outs('9h 8h', '7h 6h 2c') === 15, 'flush draw + open-ender -> 15 outs');
+assert(outs('Kh Qd', 'Ks 8c 3d') === 0, 'top pair, no draw -> 0 outs');
+assert(outs('Th 9h', '8s 7d 6c') === 0, 'already a made straight -> 0 draw outs');
+assert(PF.describeDraw(hand('Ac 4c'), hand('9c 6c 2h')).label === 'a flush draw',
+    'describeDraw labels a flush draw');
+
 console.log('\npostflop.js — decision table completeness');
 PF.CATEGORIES.forEach(c => {
     PF.CONTEXTS.forEach(ctx => {

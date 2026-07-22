@@ -277,6 +277,68 @@
         };
     }
 
+    // ---- Count the Outs: how many cards complete your draw? ----------------
+    // Fabricate a hand holding a real flush/straight draw (category < two pair
+    // so the only outs are the draw itself), then ask for the exact out count.
+    // Tiers widen the pool of draw sizes served.
+    const OUTS_TIER_TARGETS = {
+        beginner:     [4, 8, 9],
+        intermediate: [4, 8, 9, 12],
+        advanced:     [4, 8, 9, 12, 15]
+    };
+
+    function buildCountOuts(tier) {
+        const targets = OUTS_TIER_TARGETS[tier] || OUTS_TIER_TARGETS.beginner;
+        const target = pick(targets);
+        let last = null;
+        for (let attempt = 0; attempt < 400; attempt++) {
+            const d = Cards.createDealer();
+            const hole = d.draw(2);
+            const isTurn = tier !== 'beginner' && Math.random() < 0.4;
+            const board = d.draw(isTurn ? 4 : 3);
+            const made = HandEval.evaluate(hole.concat(board));
+            if (made.category >= 3) continue; // keep outs = pure draw outs
+            const info = Postflop.describeDraw(hole, board);
+            if (info.outs === 0) continue;
+
+            last = makeOutsScenario(tier, hole, board, info, isTurn);
+            if (info.outs !== target) continue;
+            return last;
+        }
+        return last;
+    }
+
+    function outsOptions(correct) {
+        // Plausible distractors drawn from the canonical out numbers.
+        const pool = [4, 6, 8, 9, 12, 15, correct - 1, correct + 1]
+            .filter((v, i, a) => v > 0 && v !== correct && a.indexOf(v) === i);
+        const chosen = [];
+        while (chosen.length < 3 && pool.length) {
+            chosen.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+        }
+        return chosen.concat(correct).sort((a, b) => a - b)
+            .map(n => ({ id: String(n), label: String(n) }));
+    }
+
+    function makeOutsScenario(tier, hole, board, info, isTurn) {
+        const street = isTurn ? 'turn' : 'flop';
+        return {
+            mode: 'countOuts',
+            scenarioKey: 'countOuts:' + info.label,
+            tier: tier,
+            prompt: 'How many cards complete your draw on the next card?',
+            context: [{ label: 'Street', value: street }],
+            cards: {
+                community: board,
+                hands: [{ label: 'Your hand', cards: hole }]
+            },
+            answers: outsOptions(info.outs),
+            correctId: String(info.outs),
+            explain: 'You hold ' + info.label + ' — ' + info.why + ' = ' +
+                     info.outs + ' outs.'
+        };
+    }
+
     // ---- Dispatch + Targeted picker ----------------------------------------
     function generate(mode, tier) {
         switch (mode) {
@@ -284,6 +346,7 @@
             case 'preflop':      return buildPreflop(tier);
             case 'potOdds':      return buildPotOdds(tier);
             case 'postflop':     return buildPostflop(tier);
+            case 'countOuts':    return buildCountOuts(tier);
             default:             return buildHandRankings(tier);
         }
     }
@@ -329,7 +392,8 @@
         buildHandRankings,
         buildPreflop,
         buildPotOdds,
-        buildPostflop
+        buildPostflop,
+        buildCountOuts
     };
 
     PK.Scenarios = Scenarios;

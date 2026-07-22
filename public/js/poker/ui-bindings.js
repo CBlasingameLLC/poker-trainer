@@ -20,6 +20,7 @@
         preflop: 'Preflop Ranges',
         potOdds: 'Pot Odds',
         postflop: 'Postflop Decisions',
+        countOuts: 'Count the Outs',
         targeted: 'Targeted Practice'
     };
 
