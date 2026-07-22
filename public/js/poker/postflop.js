@@ -121,6 +121,67 @@
         return null;
     }
 
+    // --- Out counting (for the Count-the-Outs drill) ------------------------
+
+    const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
+    const SUITS = ['s', 'h', 'd', 'c'];
+
+    // Exact count of unseen cards that complete a STRAIGHT or FLUSH on the next
+    // card — i.e. the outs to a straight/flush draw. Brute-forces the 52-card
+    // deck minus what's visible, so combo draws (flush + straight = up to 15)
+    // and overlaps are counted correctly without special-casing. Returns 0 if
+    // the hand is already a straight or better (not a draw).
+    function countDrawOuts(hole, board) {
+        const known = hole.concat(board);
+        const current = HandEval.evaluate(known);
+        if (current.category >= 5) return 0;
+        const seen = new Set(known.map(c => c.rank + c.suit));
+        let outs = 0;
+        for (let r = 0; r < RANKS.length; r++) {
+            for (let s = 0; s < SUITS.length; s++) {
+                const id = RANKS[r] + SUITS[s];
+                if (seen.has(id)) continue;
+                const card = {
+                    rank: RANKS[r], suit: SUITS[s],
+                    rankVal: r + 2,
+                    color: (SUITS[s] === 'h' || SUITS[s] === 'd') ? 'red' : 'black'
+                };
+                const ev = HandEval.evaluate(known.concat([card]));
+                if (ev.category >= 5) outs++;
+            }
+        }
+        return outs;
+    }
+
+    // Human label + breakdown for the draw the player holds, for the Count-Outs
+    // explanation. Pairs the detection helpers with the exact count.
+    function describeDraw(hole, board) {
+        const outs = countDrawOuts(hole, board);
+        const flush = hasFlushDraw(hole, board);
+        const straight = straightDrawType(hole, board);
+        let label, why;
+        if (flush && straight === 'oesd') {
+            label = 'a flush draw plus an open-ended straight draw';
+            why = 'the monster draw — 9 flush outs plus the straight outs that are a different suit';
+        } else if (flush && straight === 'gutshot') {
+            label = 'a flush draw plus a gutshot';
+            why = '9 flush outs plus the gap-filling straight cards that are a different suit';
+        } else if (flush) {
+            label = 'a flush draw';
+            why = '13 cards of your suit minus the 4 you can already see';
+        } else if (straight === 'oesd') {
+            label = 'an open-ended straight draw';
+            why = 'either end completes it — 2 ranks x 4 suits';
+        } else if (straight === 'gutshot') {
+            label = 'a gutshot straight draw';
+            why = 'one rank fills the gap — 1 rank x 4 suits';
+        } else {
+            label = 'no straight or flush draw';
+            why = 'nothing to draw to';
+        }
+        return { outs, label, why };
+    }
+
     // --- Classification ------------------------------------------------------
 
     // classify(hole, board) -> { category, made, draw }
@@ -216,7 +277,9 @@
         getAction,
         classify,
         hasFlushDraw,
-        straightDrawType
+        straightDrawType,
+        countDrawOuts,
+        describeDraw
     };
 
     PK.Postflop = Postflop;

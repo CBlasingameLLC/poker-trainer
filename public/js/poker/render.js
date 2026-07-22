@@ -97,6 +97,7 @@
         els.feedback.classList.add('hidden');
         els.feedback.classList.remove('correct', 'wrong');
         updateAccuracy();
+        refreshStreakFromStore();
     }
 
     function onGraded(payload) {
@@ -127,11 +128,37 @@
             correct ? PK.Audio.correct() : PK.Audio.wrong();
         }
         updateAccuracy();
+        if (payload.progress) updateStreak(payload.progress);
     }
 
     function updateAccuracy() {
         const acc = PK.DrillManager.sessionAccuracy();
-        els.accuracy.textContent = acc == null ? 'Session —' : ('Session ' + acc + '%');
+        els.accuracy.textContent = acc == null ? '—%' : (acc + '%');
+    }
+
+    // Streak pill: show the current run; pulse when it climbs, flash a break
+    // when it resets. Re-triggers the CSS animation by toggling the class off
+    // for a frame.
+    function updateStreak(progress) {
+        const n = progress && progress.streak ? progress.streak.current : 0;
+        els.streakN.textContent = n;
+        els.streak.classList.toggle('streak-pill--zero', n === 0);
+
+        const anim = progress && progress.streakBroken ? 'streak-pill--break'
+            : (progress && progress.streakUp ? 'streak-pill--up' : null);
+        els.streak.classList.remove('streak-pill--up', 'streak-pill--break');
+        if (anim) {
+            // force reflow so the animation restarts every time
+            void els.streak.offsetWidth;
+            els.streak.classList.add(anim);
+        }
+    }
+
+    function refreshStreakFromStore() {
+        const snap = PK.DrillManager.progressSnapshot();
+        els.streakN.textContent = snap.streak.current;
+        els.streak.classList.toggle('streak-pill--zero', snap.streak.current === 0);
+        els.streak.classList.remove('streak-pill--up', 'streak-pill--break');
     }
 
     function init() {
@@ -143,7 +170,9 @@
             feedback: document.getElementById('drill-feedback'),
             verdict: document.getElementById('feedback-verdict'),
             detail: document.getElementById('feedback-detail'),
-            accuracy: document.getElementById('drill-accuracy')
+            accuracy: document.getElementById('drill-accuracy'),
+            streak: document.getElementById('drill-streak'),
+            streakN: document.getElementById('drill-streak-n')
         };
         PK.DrillManager.subscribe((evt, payload) => {
             if (evt === 'scenario') onScenario(payload);

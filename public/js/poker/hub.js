@@ -26,8 +26,39 @@
             PK.ReferenceRender.render(els.chartsScroll, PK.DrillManager.getTier());
         } else if (tab === 'stats') {
             PK.StatsRender.render(els.statsScroll);
+        } else if (tab === 'learn') {
+            PK.LearnRender.render(els.learnScroll);
         } else if (tab === 'drills') {
             syncTargetedTile();
+            renderDailyCard();
+        }
+    }
+
+    // Daily-goal ring + streak line on the Practice tab. Circumference of an
+    // r=19 circle is ~119.4; we reveal a fraction of it via strokeDashoffset.
+    const RING_CIRCUM = 2 * Math.PI * 19;
+    function renderDailyCard() {
+        const snap = PK.DrillManager.progressSnapshot();
+        const count = snap.daily && snap.daily.date === PK.Progress.todayStr() ? snap.daily.count : 0;
+        const goal = snap.goal;
+        const frac = Math.max(0, Math.min(1, goal ? count / goal : 0));
+
+        els.dailyCount.textContent = count;
+        els.dailyGoal.textContent = goal;
+        els.dailyRingFill.style.strokeDasharray = RING_CIRCUM.toFixed(1);
+        els.dailyRingFill.style.strokeDashoffset = (RING_CIRCUM * (1 - frac)).toFixed(1);
+        els.dailyRingLabel.textContent = Math.round(frac * 100) + '%';
+        els.dailyCard.classList.toggle('daily-card--done', frac >= 1);
+
+        const ds = snap.dayStreak;
+        if (frac >= 1) {
+            els.dailyStreakLine.textContent = ds > 1
+                ? ('Goal met — ' + ds + '-day streak! 🔥')
+                : 'Daily goal met — nice! 🔥';
+        } else if (ds > 0) {
+            els.dailyStreakLine.textContent = ds + '-day streak 🔥 — keep it alive today';
+        } else {
+            els.dailyStreakLine.textContent = 'Play a hand to start your day streak 🔥';
         }
     }
 
@@ -55,6 +86,7 @@
 
     function refresh() {
         syncTargetedTile();
+        renderDailyCard();
     }
 
     function init() {
@@ -63,8 +95,15 @@
         els.tierSegs = Array.from(document.querySelectorAll('#tier-seg .seg'));
         els.chartsScroll = document.getElementById('charts-scroll');
         els.statsScroll = document.getElementById('stats-scroll');
+        els.learnScroll = document.getElementById('learn-scroll');
         els.targetedTile = document.getElementById('tile-targeted');
         els.targetedBadge = document.getElementById('targeted-badge');
+        els.dailyCard = document.getElementById('daily-card');
+        els.dailyCount = document.getElementById('daily-count');
+        els.dailyGoal = document.getElementById('daily-goal');
+        els.dailyRingFill = document.getElementById('daily-ring-fill');
+        els.dailyRingLabel = document.getElementById('daily-ring-label');
+        els.dailyStreakLine = document.getElementById('daily-streak-line');
 
         els.tabs.forEach(t => t.addEventListener('click', () => selectTab(t.dataset.tab)));
         els.tierSegs.forEach(s => s.addEventListener('click', () => setTier(s.dataset.tier)));
@@ -76,5 +115,5 @@
         selectTab('drills');
     }
 
-    PK.Hub = { init, selectTab, syncTargetedTile, setTier, refresh };
+    PK.Hub = { init, selectTab, syncTargetedTile, setTier, refresh, renderDailyCard };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

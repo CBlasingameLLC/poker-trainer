@@ -28,8 +28,11 @@
     const MODE_LABELS = {
         handRankings: 'Hand Rankings',
         preflop: 'Preflop Ranges',
+        preflopDefense: 'Facing a Raise',
         potOdds: 'Pot Odds',
         postflop: 'Postflop',
+        countOuts: 'Count Outs',
+        playHand: 'Play a Hand',
         targeted: 'Targeted'
     };
 
@@ -60,8 +63,21 @@
         if (parts[0] === 'preflop') {
             return 'Preflop: ' + parts[2] + ' from ' + parts[1];
         }
+        if (parts[0] === 'preflopDefense') {
+            return 'Facing a raise: ' + parts[2] + ' vs ' + parts[1];
+        }
         if (parts[0] === 'potOdds') {
             return 'Pot odds: ' + parts.slice(1).join(':');
+        }
+        if (parts[0] === 'countOuts') {
+            return 'Outs: ' + parts.slice(1).join(':');
+        }
+        if (parts[0] === 'playHand') {
+            const map = {
+                'preflop-open': 'Play: preflop open', 'preflop-response': 'Play: facing a raise',
+                'postflop-checked': 'Play: checked to you', 'postflop-facing': 'Play: facing a bet'
+            };
+            return map[parts[1]] || 'Play a hand';
         }
         if (parts[0] === 'postflop') {
             const info = PK.Postflop && PK.Postflop.CATEGORY_INFO[parts[1]];
@@ -83,6 +99,31 @@
         section.appendChild(el('h2', 'panel-title', 'Your Stats'));
         section.appendChild(el('p', 'panel-sub', 'Lifetime accuracy across every drill.'));
         section.appendChild(headline);
+        return section;
+    }
+
+    function buildStreaks() {
+        const section = el('div', 'stats-section');
+        section.appendChild(el('div', 'stats-section-title', 'Streaks'));
+
+        const streak = PK.Storage.getStreak();
+        const daily = PK.Storage.getDaily();
+        const dayStreak = PK.Progress
+            ? PK.Progress.activeDayStreak(daily, PK.Progress.todayStr())
+            : (daily.dayStreak || 0);
+
+        const grid = el('div', 'streak-grid');
+        [
+            { label: 'Current run', value: streak.current, unit: streak.current === 1 ? 'correct' : 'correct' },
+            { label: 'Best run', value: streak.best, unit: 'correct' },
+            { label: 'Day streak', value: dayStreak, unit: dayStreak === 1 ? 'day' : 'days' }
+        ].forEach(s => {
+            const cell = el('div', 'streak-cell');
+            cell.appendChild(el('span', 'streak-cell__value', String(s.value)));
+            cell.appendChild(el('span', 'streak-cell__label', s.label));
+            grid.appendChild(cell);
+        });
+        section.appendChild(grid);
         return section;
     }
 
@@ -251,6 +292,7 @@
         const log = PK.Storage.getMistakeLog();
 
         container.appendChild(buildHeadline(lifetime));
+        container.appendChild(buildStreaks());
         container.appendChild(buildBars(lifetime));
         container.appendChild(buildTrend(history));
         container.appendChild(buildWeakSpots(log));

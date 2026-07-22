@@ -17,6 +17,7 @@
         PK.DrillManager.init();
         PK.Render.init();
         PK.UI.init();
+        PK.TableRender.init();
         PK.Hub.init();
 
         // Offline support — the one thing we add over the blackjack app.

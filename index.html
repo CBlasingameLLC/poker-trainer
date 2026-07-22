@@ -37,6 +37,20 @@
                     <h2 class="panel-title">Practice</h2>
                     <p class="panel-sub">Pick a skill to drill. Your accuracy and weak spots are tracked automatically.</p>
 
+                    <div class="daily-card" id="daily-card">
+                        <div class="daily-ring" id="daily-ring">
+                            <svg viewBox="0 0 44 44" class="daily-ring__svg">
+                                <circle class="daily-ring__track" cx="22" cy="22" r="19"></circle>
+                                <circle class="daily-ring__fill" id="daily-ring-fill" cx="22" cy="22" r="19"></circle>
+                            </svg>
+                            <span class="daily-ring__label" id="daily-ring-label">0%</span>
+                        </div>
+                        <div class="daily-card__text">
+                            <div class="daily-card__goal"><b id="daily-count">0</b> / <span id="daily-goal">20</span> hands today</div>
+                            <div class="daily-card__streak" id="daily-streak-line">Play a hand to start your day streak 🔥</div>
+                        </div>
+                    </div>
+
                     <div class="tier-select">
                         <span class="tier-select__label">Difficulty</span>
                         <div class="segmented" id="tier-seg">
@@ -55,7 +69,12 @@
                         <button class="tile tile--preflop" data-mode="preflop">
                             <span class="tile__glyph">♠︎</span>
                             <span class="tile__name">Preflop Ranges</span>
-                            <span class="tile__sub">Raise, call, or fold from every seat.</span>
+                            <span class="tile__sub">Open-raise or fold from every seat.</span>
+                        </button>
+                        <button class="tile tile--defense" data-mode="preflopDefense">
+                            <span class="tile__glyph">♥︎</span>
+                            <span class="tile__name">Facing a Raise</span>
+                            <span class="tile__sub">3-bet, call, or fold to an open.</span>
                         </button>
                         <button class="tile tile--odds" data-mode="potOdds">
                             <span class="tile__glyph">🧮</span>
@@ -67,6 +86,11 @@
                             <span class="tile__name">Postflop Decisions</span>
                             <span class="tile__sub">Bet, check, call, raise, or fold after the flop.</span>
                         </button>
+                        <button class="tile tile--outs" data-mode="countOuts">
+                            <span class="tile__glyph">🔢</span>
+                            <span class="tile__name">Count the Outs</span>
+                            <span class="tile__sub">How many cards complete your draw?</span>
+                        </button>
                         <button class="tile tile--targeted" id="tile-targeted" data-mode="targeted" disabled>
                             <span class="tile__badge" id="targeted-badge">Locked</span>
                             <span class="tile__glyph">🎯</span>
@@ -74,6 +98,21 @@
                             <span class="tile__sub">Re-drills the hands you miss most.</span>
                         </button>
                     </div>
+
+                    <button class="play-cta" id="btn-play-hand">
+                        <span class="play-cta__glyph">▶</span>
+                        <span class="play-cta__text">
+                            <span class="play-cta__title">Play a Full Hand</span>
+                            <span class="play-cta__sub">Sit at a 6-handed table — every decision coached</span>
+                        </span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- LEARN -->
+            <section class="hub-panel" data-panel="learn">
+                <div class="hub-scroll" id="learn-scroll">
+                    <!-- learn-render.js fills this -->
                 </div>
             </section>
 
@@ -115,6 +154,17 @@
                             <span class="settings-row__sub">Show the reasoning even when you answer correctly.</span>
                         </span>
                     </label>
+                    <label class="settings-row settings-row--select">
+                        <span class="settings-row__text">Daily goal
+                            <span class="settings-row__sub">Hands per day to close your streak ring.</span>
+                        </span>
+                        <select id="set-daily-goal" class="settings-select">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                        </select>
+                    </label>
                     <button class="link-btn" id="btn-clear-history">Clear all statistics</button>
                     <p class="stats-note">Poker Trainer stores everything on this device only — no account, no server.</p>
                 </div>
@@ -123,6 +173,7 @@
 
         <nav class="hub__nav">
             <button class="hub-tab active" data-tab="drills"><span class="hub-tab__glyph">🎴</span>Practice</button>
+            <button class="hub-tab" data-tab="learn"><span class="hub-tab__glyph">📚</span>Learn</button>
             <button class="hub-tab" data-tab="charts"><span class="hub-tab__glyph">📊</span>Charts</button>
             <button class="hub-tab" data-tab="stats"><span class="hub-tab__glyph">📈</span>Stats</button>
             <button class="hub-tab" data-tab="settings"><span class="hub-tab__glyph">⚙️</span>Settings</button>
@@ -134,7 +185,10 @@
         <div class="topbar">
             <button class="text-btn" id="btn-drill-back">‹ Menu</button>
             <span class="topbar__title" id="drill-title">Drill</span>
-            <span class="accuracy-pill" id="drill-accuracy">—</span>
+            <span class="topbar__group--right">
+                <span class="streak-pill" id="drill-streak" title="Correct-answer streak"><span class="streak-pill__flame">🔥</span><span id="drill-streak-n">0</span></span>
+                <span class="accuracy-pill" id="drill-accuracy" title="Session accuracy">—%</span>
+            </span>
         </div>
 
         <div class="drill-body">
@@ -152,6 +206,35 @@
         </div>
     </div>
 
+    <!-- ===================== PLAY-A-HAND TABLE ===================== -->
+    <div id="table-container">
+        <div class="topbar">
+            <button class="text-btn" id="btn-table-back">‹ Menu</button>
+            <span class="topbar__title">Play a Hand</span>
+            <span class="topbar__group--right">
+                <span class="streak-pill" id="table-streak"><span class="streak-pill__flame">🔥</span><span id="table-streak-n">0</span></span>
+            </span>
+        </div>
+
+        <div class="table-felt">
+            <div class="table-seats" id="table-seats"></div>
+            <div class="table-center">
+                <div class="table-pot" id="table-pot">Pot 1.5 BB</div>
+                <div class="board" id="table-board"></div>
+            </div>
+        </div>
+
+        <div class="table-dock">
+            <div class="table-log" id="table-log"></div>
+            <div class="table-prompt" id="table-prompt"></div>
+            <div class="feedback hidden" id="table-feedback">
+                <div class="feedback__verdict" id="table-verdict"></div>
+                <div class="feedback__detail" id="table-detail"></div>
+            </div>
+            <div class="answer-grid" id="table-actions"></div>
+        </div>
+    </div>
+
     <!-- ===================== SCRIPTS (order matters) ===================== -->
     <!-- Pure logic (DOM-free, also module.exports for Node verification) -->
     <script defer src="/js/poker/cards.js"></script>
@@ -159,6 +242,8 @@
     <script defer src="/js/poker/ranges.js"></script>
     <script defer src="/js/poker/odds.js"></script>
     <script defer src="/js/poker/postflop.js"></script>
+    <script defer src="/js/poker/progress.js"></script>
+    <script defer src="/js/poker/table.js"></script>
     <script defer src="/js/poker/persistence.js"></script>
     <script defer src="/js/poker/scenarios.js"></script>
     <script defer src="/js/poker/drill-manager.js"></script>
@@ -167,6 +252,8 @@
     <script defer src="/js/poker/render.js"></script>
     <script defer src="/js/poker/reference-render.js"></script>
     <script defer src="/js/poker/stats-render.js"></script>
+    <script defer src="/js/poker/learn-render.js"></script>
+    <script defer src="/js/poker/table-render.js"></script>
     <script defer src="/js/poker/ui-bindings.js"></script>
     <script defer src="/js/poker/hub.js"></script>
     <script defer src="/js/poker/boot.js"></script>

@@ -75,10 +75,35 @@
 
     // --- Range string expansion ---------------------------------------------
 
-    // Expand a single token ("22+", "ATs+", "KQo", "T9s") into hand classes.
+    // Inclusive dash ranges: "TT-JJ" / "22-99" (pairs) and same-high suited or
+    // offsuit runs like "A9s-A2s". Order-insensitive.
+    function expandDash(tok) {
+        const parts = tok.split('-').map(s => s.trim());
+        if (parts.length !== 2) return [];
+        const a = parts[0], b = parts[1];
+        const out = [];
+        // pair-pair
+        if (a.length === 2 && a[0] === a[1] && b.length === 2 && b[0] === b[1]) {
+            let lo = idx(a[0]), hi = idx(b[0]);
+            if (lo > hi) { const t = lo; lo = hi; hi = t; }
+            for (let i = lo; i <= hi; i++) out.push(R[i] + R[i]);
+            return out;
+        }
+        // same high card + same suffix, e.g. A9s-A2s
+        if (a.length === 3 && b.length === 3 && a[0] === b[0] && a[2] === b[2]) {
+            let lo = idx(a[1]), hi = idx(b[1]);
+            if (lo > hi) { const t = lo; lo = hi; hi = t; }
+            for (let i = lo; i <= hi; i++) out.push(a[0] + R[i] + a[2]);
+            return out;
+        }
+        return [];
+    }
+
+    // Expand a single token ("22+", "ATs+", "KQo", "T9s", "TT-JJ") into classes.
     function expandToken(tok) {
         tok = tok.trim();
         if (!tok) return [];
+        if (tok.indexOf('-') !== -1) return expandDash(tok);
         const plus = tok.endsWith('+');
         if (plus) tok = tok.slice(0, -1);
         const out = [];
@@ -118,6 +143,38 @@
         });
     });
 
+    // --- Facing a raise: response ranges (3-bet / call / fold) --------------
+    // Bucketed by the OPENER's position (an early open is respected more than a
+    // late one). threeBet takes priority over call when a hand is in both.
+    const BUCKETS = ['early', 'late'];
+    const BUCKET_LABELS = { early: 'early position', late: 'late position' };
+    // Concrete opener seats sampled for the prompt text (graded by bucket).
+    const BUCKET_OPENERS = { early: ['UTG', 'MP'], late: ['CO', 'BTN'] };
+
+    const RESPONSE_STRINGS = {
+        early: {
+            beginner:     { threeBet: 'QQ+, AKs, AKo', call: 'TT-JJ, AQs, KQs' },
+            intermediate: { threeBet: 'JJ+, AKs, AKo, AQs', call: '77-TT, AJs, ATs, KQs, KJs, QJs' },
+            advanced:     { threeBet: 'TT+, AJs+, AKo, A5s', call: '22-99, ATs, KTs+, QTs+, JTs, T9s, AJo, KQo' }
+        },
+        late: {
+            beginner:     { threeBet: 'JJ+, AKs, AKo', call: '88-TT, AQs, AJs, KQs' },
+            intermediate: { threeBet: 'TT+, AQs+, AKo, A5s', call: '55-99, AJs, ATs, KJs+, QJs, JTs, T9s' },
+            advanced:     { threeBet: '99+, ATs+, AJo+, KQo, A5s, A4s', call: '22-88, A9s-A2s, K9s+, Q9s+, J9s+, T8s+, 98s, 87s, 76s' }
+        }
+    };
+
+    const RESPONSES = {};
+    BUCKETS.forEach(bucket => {
+        RESPONSES[bucket] = {};
+        TIERS.forEach(tier => {
+            RESPONSES[bucket][tier] = {
+                threeBet: expandRange(RESPONSE_STRINGS[bucket][tier].threeBet),
+                call: expandRange(RESPONSE_STRINGS[bucket][tier].call)
+            };
+        });
+    });
+
     // --- Public API ----------------------------------------------------------
 
     // Canonical class string for two hole cards: "AA", "AKs", "AKo".
@@ -139,6 +196,19 @@
         return getActionForClass(handClass(holeCards[0], holeCards[1]), position, tier);
     }
 
+    // Facing a raise: '3bet' | 'call' | 'fold' (threeBet wins ties with call).
+    function getResponseForClass(cls, bucket, tier) {
+        const r = (RESPONSES[bucket] && RESPONSES[bucket][tier]) || null;
+        if (!r) return 'fold';
+        if (r.threeBet.has(cls)) return '3bet';
+        if (r.call.has(cls)) return 'call';
+        return 'fold';
+    }
+
+    function getResponse(holeCards, bucket, tier) {
+        return getResponseForClass(handClass(holeCards[0], holeCards[1]), bucket, tier);
+    }
+
     // Grid class for a cell at (rowRank, colRank) using the standard layout:
     // upper-right triangle = suited, lower-left = offsuit, diagonal = pairs.
     function gridClass(rowRank, colRank) {
@@ -158,10 +228,16 @@
         TIERS,
         R_DESC,
         RANGE_STRINGS,
+        BUCKETS,
+        BUCKET_LABELS,
+        BUCKET_OPENERS,
+        RESPONSE_STRINGS,
         expandRange,
         handClass,
         getAction,
         getActionForClass,
+        getResponse,
+        getResponseForClass,
         gridClass
     };
 

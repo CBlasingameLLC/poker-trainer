@@ -150,6 +150,62 @@
         };
     }
 
+    // ---- Facing a raise: 3-bet / call / fold -------------------------------
+    // Random deals are ~90% fold, which would train "always fold" — so target
+    // one of the three actions first (balanced) and deal until it appears. At
+    // beginner tier a targeted fold must also fold in the widest range, so
+    // beginners only see clearly-trash folds, not marginal ones.
+    function buildPreflopDefense(tier) {
+        const target = pick(['3bet', 'call', 'fold']);
+        let last = null;
+        for (let attempt = 0; attempt < 400; attempt++) {
+            const d = Cards.createDealer();
+            const hole = d.draw(2);
+            const bucket = pick(Ranges.BUCKETS);
+            const cls = Ranges.handClass(hole[0], hole[1]);
+            const resp = Ranges.getResponseForClass(cls, bucket, tier);
+
+            last = makeDefenseScenario(tier, bucket, cls, hole);
+            if (resp !== target) continue;
+            if (tier === 'beginner' && target === 'fold' &&
+                Ranges.getResponseForClass(cls, bucket, 'advanced') !== 'fold') {
+                continue; // skip marginal folds for beginners
+            }
+            return last;
+        }
+        return last;
+    }
+
+    function makeDefenseScenario(tier, bucket, cls, hole) {
+        const correct = Ranges.getResponseForClass(cls, bucket, tier);
+        const opener = pick(Ranges.BUCKET_OPENERS[bucket]);
+        const actionWord = { '3bet': 'RE-RAISE (3-bet)', call: 'CALL', fold: 'FOLD' }[correct];
+        return {
+            mode: 'preflopDefense',
+            scenarioKey: 'preflopDefense:' + bucket + ':' + cls,
+            tier: tier,
+            prompt: 'A player opens with a raise from ' + opener +
+                    '. The action is on you — 3-bet, call, or fold?',
+            context: [
+                { label: 'Opener', value: opener },
+                { label: 'Hand', value: cls }
+            ],
+            cards: {
+                community: [],
+                hands: [{ label: 'Your hand', cards: hole }]
+            },
+            answers: [
+                { id: '3bet', label: '3-Bet' },
+                { id: 'call', label: 'Call' },
+                { id: 'fold', label: 'Fold' }
+            ],
+            correctId: correct,
+            explain: cls + ' versus ' + (bucket === 'early' ? 'an' : 'a') + ' ' +
+                     Ranges.BUCKET_LABELS[bucket] + ' open plays as a ' + actionWord +
+                     ' at the ' + tier + ' level.'
+        };
+    }
+
     // ---- Pot Odds: is calling profitable? ----------------------------------
     const POT_SIZES = [20, 30, 40, 50, 60, 80, 100, 120, 150, 200];
     const BET_FRACS = [0.33, 0.5, 0.66, 0.75, 1];
@@ -277,14 +333,78 @@
         };
     }
 
+    // ---- Count the Outs: how many cards complete your draw? ----------------
+    // Fabricate a hand holding a real flush/straight draw (category < two pair
+    // so the only outs are the draw itself), then ask for the exact out count.
+    // Tiers widen the pool of draw sizes served.
+    const OUTS_TIER_TARGETS = {
+        beginner:     [4, 8, 9],
+        intermediate: [4, 8, 9, 12],
+        advanced:     [4, 8, 9, 12, 15]
+    };
+
+    function buildCountOuts(tier) {
+        const targets = OUTS_TIER_TARGETS[tier] || OUTS_TIER_TARGETS.beginner;
+        const target = pick(targets);
+        let last = null;
+        for (let attempt = 0; attempt < 400; attempt++) {
+            const d = Cards.createDealer();
+            const hole = d.draw(2);
+            const isTurn = tier !== 'beginner' && Math.random() < 0.4;
+            const board = d.draw(isTurn ? 4 : 3);
+            const made = HandEval.evaluate(hole.concat(board));
+            if (made.category >= 3) continue; // keep outs = pure draw outs
+            const info = Postflop.describeDraw(hole, board);
+            if (info.outs === 0) continue;
+
+            last = makeOutsScenario(tier, hole, board, info, isTurn);
+            if (info.outs !== target) continue;
+            return last;
+        }
+        return last;
+    }
+
+    function outsOptions(correct) {
+        // Plausible distractors drawn from the canonical out numbers.
+        const pool = [4, 6, 8, 9, 12, 15, correct - 1, correct + 1]
+            .filter((v, i, a) => v > 0 && v !== correct && a.indexOf(v) === i);
+        const chosen = [];
+        while (chosen.length < 3 && pool.length) {
+            chosen.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+        }
+        return chosen.concat(correct).sort((a, b) => a - b)
+            .map(n => ({ id: String(n), label: String(n) }));
+    }
+
+    function makeOutsScenario(tier, hole, board, info, isTurn) {
+        const street = isTurn ? 'turn' : 'flop';
+        return {
+            mode: 'countOuts',
+            scenarioKey: 'countOuts:' + info.label,
+            tier: tier,
+            prompt: 'How many cards complete your draw on the next card?',
+            context: [{ label: 'Street', value: street }],
+            cards: {
+                community: board,
+                hands: [{ label: 'Your hand', cards: hole }]
+            },
+            answers: outsOptions(info.outs),
+            correctId: String(info.outs),
+            explain: 'You hold ' + info.label + ' — ' + info.why + ' = ' +
+                     info.outs + ' outs.'
+        };
+    }
+
     // ---- Dispatch + Targeted picker ----------------------------------------
     function generate(mode, tier) {
         switch (mode) {
-            case 'handRankings': return buildHandRankings(tier);
-            case 'preflop':      return buildPreflop(tier);
-            case 'potOdds':      return buildPotOdds(tier);
-            case 'postflop':     return buildPostflop(tier);
-            default:             return buildHandRankings(tier);
+            case 'handRankings':    return buildHandRankings(tier);
+            case 'preflop':         return buildPreflop(tier);
+            case 'preflopDefense':  return buildPreflopDefense(tier);
+            case 'potOdds':         return buildPotOdds(tier);
+            case 'postflop':        return buildPostflop(tier);
+            case 'countOuts':       return buildCountOuts(tier);
+            default:                return buildHandRankings(tier);
         }
     }
 
@@ -328,8 +448,10 @@
         // exposed for testing / reuse
         buildHandRankings,
         buildPreflop,
+        buildPreflopDefense,
         buildPotOdds,
-        buildPostflop
+        buildPostflop,
+        buildCountOuts
     };
 
     PK.Scenarios = Scenarios;
